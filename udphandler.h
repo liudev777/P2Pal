@@ -6,6 +6,9 @@
 #include <QVector>
 #include <QByteArray>
 #include <QVariantMap>
+#include <QMap>
+#include <QTimer>
+#include <QSet>
 
 class UDPHandler : public QObject
 {
@@ -15,8 +18,16 @@ public:
     explicit UDPHandler(QObject *parent = nullptr, quint16 port = 5000);
     void sendIntro();
     void sendMessage(QString message);
+    void resendMessages(int sequenceNum);
+    void sendAcknowledgement(quint16 senderPort, int sequenceNum);
     QByteArray serializeVariantMap(QVariantMap &messageMap);
     QVariantMap deserializeVariantMap(QByteArray &buffer);
+    int sequenceNum = 0;
+
+    struct MessageInfo {
+        QByteArray data;
+        QSet<quint16> pendingNeighbors;
+    };
 
 private slots:
     void readyRead();
@@ -26,7 +37,9 @@ signals:
 
 private:
     void initNeighbors();
-    QVariantMap msg(QString message, quint16 origin, int sequenceNum = 0);
+    QByteArray msg(QString message, quint16 origin, int sequenceNum = 0, QString type = "chat");
+    QMap<int, MessageInfo> pendingMessages;
+    QTimer *resendTimer;
 
 private:
     QUdpSocket *socket;

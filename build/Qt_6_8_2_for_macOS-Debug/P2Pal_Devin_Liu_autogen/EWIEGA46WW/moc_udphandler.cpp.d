@@ -891,7 +891,9 @@
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QByteArray \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QMap \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QObject \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QSet \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QString \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QTimer \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QVariant \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QVariantMap \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QVector \
@@ -908,6 +910,7 @@
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qatomic.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qatomic_cxx11.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qbasicatomic.h \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qbasictimer.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qbindingstorage.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qbytearray.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qbytearrayalgorithms.h \
@@ -992,6 +995,7 @@
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtdeprecationmarkers.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtenvironmentvariables.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtextstream.h \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtimer.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtmetamacros.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtnoop.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtpreprocessorsupport.h \

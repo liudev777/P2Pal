@@ -3,6 +3,7 @@
 #include<QVariantMap>
 #include<QDataStream>
 #include<QByteArray>
+#include<QSet>
 
 UDPHandler::UDPHandler(QObject *parent, quint16 port) : QObject(parent), myPort(port){
 
@@ -27,7 +28,13 @@ UDPHandler::UDPHandler(QObject *parent, quint16 port) : QObject(parent), myPort(
 
     // connect to signal and slot
     connect(socket,&QUdpSocket::readyRead, this, &UDPHandler::readyRead);
+
 }
+
+struct MessageInfo {
+    QByteArray data;
+    QSet<quint16> pendingNeighbors;
+};
 
 // find neighbors
 void UDPHandler::initNeighbors() {
@@ -60,16 +67,7 @@ QVariantMap UDPHandler::deserializeVariantMap(QByteArray &buffer) {
 // function to send out info
 void UDPHandler::sendIntro() {
     QString message = QString("Hello from port %1").arg(myPort);
-
-    QVariantMap messageMap = msg(message, myPort, 0);
-
-    QByteArray data = serializeVariantMap(messageMap);
-
-    // write datagram to socket
-    for (quint16 neighbor : myNeighbors) {
-        socket->writeDatagram(data,QHostAddress::LocalHost,neighbor);
-    }
-
+    sendMessage(message);
 }
 
 // function to send out info
@@ -79,9 +77,9 @@ void UDPHandler::sendMessage(QString message) {
         return;
     }
 
-
-    QByteArray data;
-    data.append(message.toUtf8());
+    QByteArray data = msg(message, myPort, sequenceNum);
+    MessageInfo msgInfo;
+    msgInfo.data = data;
 
     // write datagram to socket
     for (quint16 neighbor : myNeighbors) {
@@ -90,18 +88,63 @@ void UDPHandler::sendMessage(QString message) {
             return;
         }
         socket->writeDatagram(data,QHostAddress::LocalHost,neighbor);
+        msgInfo.pendingNeighbors.insert(neighbor);
     }
 
+    pendingMessages.insert(sequenceNum, msgInfo);
+
+    int localSequenceNum = sequenceNum;
+    QTimer::singleShot(5000, this, [this, localSequenceNum]() {
+        resendMessages(localSequenceNum);
+    });
+
+    // increment message num
+    sequenceNum++;
+}
+
+void UDPHandler::resendMessages(int sequenceNum) {
+    if (!pendingMessages.contains(sequenceNum)) return;
+
+    MessageInfo &msgInfo = pendingMessages[sequenceNum];
+
+    if (!msgInfo.pendingNeighbors.isEmpty()) {
+        qDebug() << "Resending message" << sequenceNum << "to neighbors: " << msgInfo.pendingNeighbors;
+
+        QByteArray data = msgInfo.data;
+
+        for (quint16 neighbor : msgInfo.pendingNeighbors) {
+            socket->writeDatagram(data, QHostAddress::LocalHost,neighbor);
+        }
+
+        qDebug() << "Max resend attempts reached for message" << sequenceNum;
+        pendingMessages.remove(sequenceNum);
+    } else {
+        qDebug() << "All neighbors received message" << sequenceNum;
+        pendingMessages.remove(sequenceNum);
+    }
+
+    return;
 }
 
 // store message, origin, and sequence number in QVariantMap
-QVariantMap UDPHandler::msg(QString message, quint16 origin, int sequenceNum) {
+QByteArray UDPHandler::msg(QString message, quint16 origin, int sequenceNum, QString type) {
     qDebug() << "message: " << message << "origin: " << origin << "sequence number: " << sequenceNum;
+
     QVariantMap messageMap;
     messageMap["message"] = message;
     messageMap["origin"] = origin;
     messageMap["sequenceNum"] = sequenceNum;
-    return messageMap;
+    messageMap["type"] = type;
+
+    QByteArray data = serializeVariantMap(messageMap);
+
+    return data;
+}
+
+// sends an ack message to let sender know we got the message
+void UDPHandler::sendAcknowledgement(quint16 senderPort, int sequenceNum) {
+    QByteArray data = msg("", myPort, sequenceNum, "ack");
+    socket->writeDatagram(data, QHostAddress::LocalHost, senderPort);
 }
 
 // function to handle receiving signal from socket
@@ -122,11 +165,26 @@ void UDPHandler::readyRead() {
 
     QVariantMap messageMap = deserializeVariantMap(buffer);
 
-    qDebug() << "map: " << messageMap;
-
+    QString type = messageMap.value("type").toString();
     QString message = messageMap.value("message").toString();
     quint16 origin = messageMap.value("origin").toUInt();
+    int sequenceNum = messageMap.value("sequenceNum").toInt();
 
-    // emits signal that gets picked up by receivedMessageBox and displayed
-    emit messageReceived(origin, message);
+    if (type == "chat") {
+        qDebug() << "Received message: " << messageMap;
+
+        // let sender know we got the msg
+        sendAcknowledgement(senderPort, sequenceNum);
+
+        // emits signal that gets picked up by receivedMessageBox and displayed
+        emit messageReceived(origin, message);
+    } else if (type == "ack"){
+        qDebug() << "Received acknowledgement for message" << sequenceNum << "from" << origin;
+
+        // since we got the ack, we don't want to resend them the message
+        if (pendingMessages.contains(sequenceNum)) {
+            pendingMessages[sequenceNum].pendingNeighbors.remove(senderPort);
+        }
+    }
+
 }

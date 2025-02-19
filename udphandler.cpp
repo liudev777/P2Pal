@@ -1,9 +1,10 @@
 #include "udphandler.h"
 #include<QUdpSocket>
-#include<vector>
+#include<QVariantMap>
+#include<QDataStream>
+#include<QByteArray>
 
 UDPHandler::UDPHandler(QObject *parent, quint16 port) : QObject(parent), myPort(port){
-    qDebug() << "Creating UDPHandler instance on port" << port;
 
     // make and bind socket to address and port
     socket = new QUdpSocket(this);
@@ -28,6 +29,7 @@ UDPHandler::UDPHandler(QObject *parent, quint16 port) : QObject(parent), myPort(
     connect(socket,&QUdpSocket::readyRead, this, &UDPHandler::readyRead);
 }
 
+// find neighbors
 void UDPHandler::initNeighbors() {
     if (myPort == 5000) {
         myNeighbors.append(myPort + 1);
@@ -41,10 +43,27 @@ void UDPHandler::initNeighbors() {
     qDebug() << "My neighbors: " << myNeighbors;
 }
 
+QByteArray UDPHandler::serializeVariantMap(QVariantMap &messageMap) {
+    QByteArray buffer;
+    QDataStream stream(&buffer, QIODevice::WriteOnly);
+    stream << messageMap;
+    return buffer;
+}
+
+QVariantMap UDPHandler::deserializeVariantMap(QByteArray &buffer) {
+    QVariantMap messageMap;
+    QDataStream stream(buffer);
+    stream >> messageMap;
+    return messageMap;
+}
+
 // function to send out info
 void UDPHandler::sendIntro() {
-    QByteArray data;
-    data.append(QString("Hello from port %1").arg(myPort).toUtf8());
+    QString message = QString("Hello from port %1").arg(myPort);
+
+    QVariantMap messageMap = msg(message, myPort, 0);
+
+    QByteArray data = serializeVariantMap(messageMap);
 
     // write datagram to socket
     for (quint16 neighbor : myNeighbors) {
@@ -60,6 +79,7 @@ void UDPHandler::sendMessage(QString message) {
         return;
     }
 
+
     QByteArray data;
     data.append(message.toUtf8());
 
@@ -74,7 +94,17 @@ void UDPHandler::sendMessage(QString message) {
 
 }
 
+// store message, origin, and sequence number in QVariantMap
+QVariantMap UDPHandler::msg(QString message, quint16 origin, int sequenceNum) {
+    qDebug() << "message: " << message << "origin: " << origin << "sequence number: " << sequenceNum;
+    QVariantMap messageMap;
+    messageMap["message"] = message;
+    messageMap["origin"] = origin;
+    messageMap["sequenceNum"] = sequenceNum;
+    return messageMap;
+}
 
+// function to handle receiving signal from socket
 void UDPHandler::readyRead() {
     QByteArray buffer;
     buffer.resize(socket->pendingDatagramSize()); // resize so we don't accidentally lose data
@@ -86,10 +116,17 @@ void UDPHandler::readyRead() {
     // read datagram from socket
     socket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
 
-    qDebug() << "Sender IP: " << sender.toString();
-    qDebug() << "Sender Port: " << senderPort;
-    qDebug() << "Message: " << buffer;
+    // qDebug() << "Sender IP: " << sender.toString();
+    // qDebug() << "Sender Port: " << senderPort;
+    // qDebug() << "Message: " << buffer;
 
-    QString message = QString::fromUtf8(buffer);
-    emit messageReceived(senderPort, message);
+    QVariantMap messageMap = deserializeVariantMap(buffer);
+
+    qDebug() << "map: " << messageMap;
+
+    QString message = messageMap.value("message").toString();
+    quint16 origin = messageMap.value("origin").toUInt();
+
+    // emits signal that gets picked up by receivedMessageBox and displayed
+    emit messageReceived(origin, message);
 }

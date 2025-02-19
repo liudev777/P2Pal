@@ -890,7 +890,12 @@
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/16/include/limits.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/16/include/stdarg.h \
   /Users/devin/Code/P2Pal_Devin_Liu/udphandler.h \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QByteArray \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QMap \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QObject \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QString \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QVariant \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QVariantMap \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QVector \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/q20functional.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/q20iterator.h \
@@ -1009,6 +1014,7 @@
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtypes.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qutf8stringview.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qvariant.h \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qvariantmap.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qvarlengtharray.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qvector.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qversiontagging.h \

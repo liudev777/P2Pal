@@ -8,6 +8,8 @@ MainWindow::MainWindow(QWidget *parent, UDPHandler *udpHandler)
 {
     ui->setupUi(this);
 
+    ui->editMessageBox->setFocus(); // autofocus on launch
+
     connect(udpHandler, &UDPHandler::messageReceived, this, &MainWindow::displayReceivedMessage);
 }
 

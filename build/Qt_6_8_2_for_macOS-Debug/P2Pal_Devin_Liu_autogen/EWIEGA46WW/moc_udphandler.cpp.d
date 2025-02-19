@@ -888,11 +888,17 @@
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/16/include/__stdarg_va_list.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/16/include/limits.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/16/include/stdarg.h \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QByteArray \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QMap \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QObject \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QString \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QVariant \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QVariantMap \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/QVector \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/q20functional.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/q20memory.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/q20type_traits.h \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/q23utility.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qalgorithms.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qanystringview.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qarraydata.h \
@@ -997,6 +1003,8 @@
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtypeinfo.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qtypes.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qutf8stringview.h \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qvariant.h \
+  /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qvariantmap.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qvarlengtharray.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qvector.h \
   /Users/devin/Qt/6.8.2/macos/lib/QtCore.framework/Versions/A/Headers/qversiontagging.h \

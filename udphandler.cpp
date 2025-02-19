@@ -22,13 +22,13 @@ UDPHandler::UDPHandler(QObject *parent, quint16 port) : QObject(parent), myPort(
 
     qDebug() << "UDP socket successfully bound to port" << myPort;
 
-    InitNeighbors();
+    initNeighbors();
 
     // connect to signal and slot
     connect(socket,&QUdpSocket::readyRead, this, &UDPHandler::readyRead);
 }
 
-void UDPHandler::InitNeighbors() {
+void UDPHandler::initNeighbors() {
     if (myPort == 5000) {
         myNeighbors.append(myPort + 1);
     } else if (myPort == 5009) {
@@ -42,7 +42,7 @@ void UDPHandler::InitNeighbors() {
 }
 
 // function to send out info
-void UDPHandler::SendIntro() {
+void UDPHandler::sendIntro() {
     QByteArray data;
     data.append(QString("Hello from port %1").arg(myPort).toUtf8());
 
@@ -54,7 +54,7 @@ void UDPHandler::SendIntro() {
 }
 
 // function to send out info
-void UDPHandler::SendMessage(QString message) {
+void UDPHandler::sendMessage(QString message) {
     if (myNeighbors.isEmpty()) {
         qDebug() << "Error: empty neighbor";
         return;
@@ -89,4 +89,7 @@ void UDPHandler::readyRead() {
     qDebug() << "Sender IP: " << sender.toString();
     qDebug() << "Sender Port: " << senderPort;
     qDebug() << "Message: " << buffer;
+
+    QString message = QString::fromUtf8(buffer);
+    emit messageReceived(senderPort, message);
 }

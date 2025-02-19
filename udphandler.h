@@ -11,14 +11,17 @@ class UDPHandler : public QObject
 
 public:
     explicit UDPHandler(QObject *parent = nullptr, quint16 port = 5000);
-    void SendIntro();
-    void SendMessage(QString message);
+    void sendIntro();
+    void sendMessage(QString message);
 
 private slots:
     void readyRead();
 
+signals:
+    void messageReceived(quint16 senderPort, QString message);
+
 private:
-    void InitNeighbors();
+    void initNeighbors();
 
 private:
     QUdpSocket *socket;

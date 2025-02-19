@@ -20,9 +20,11 @@ public:
 
 private slots:
     void on_sendButton_clicked();
+    void displayReceivedMessage(quint16 senderPort, QString message);
 
 private:
     Ui::MainWindow *ui;
     UDPHandler *udpHandler;
+
 };
 #endif // MAINWINDOW_H

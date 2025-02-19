@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 
     UDPHandler udpHandler(nullptr, port);
 
-    udpHandler.SendIntro();
+    udpHandler.sendIntro();
 
     MainWindow w(nullptr, &udpHandler);
     w.show();

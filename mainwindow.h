@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "udphandler.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -14,10 +15,14 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget *parent = nullptr, UDPHandler *udpHandler = nullptr);
     ~MainWindow();
+
+private slots:
+    void on_sendButton_clicked();
 
 private:
     Ui::MainWindow *ui;
+    UDPHandler *udpHandler;
 };
 #endif // MAINWINDOW_H

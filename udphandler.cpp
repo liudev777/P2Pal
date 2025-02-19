@@ -1,5 +1,6 @@
 #include "udphandler.h"
 #include<QUdpSocket>
+#include<vector>
 
 UDPHandler::UDPHandler(QObject *parent, quint16 port) : QObject(parent), myPort(port){
     qDebug() << "Creating UDPHandler instance on port" << port;
@@ -9,16 +10,35 @@ UDPHandler::UDPHandler(QObject *parent, quint16 port) : QObject(parent), myPort(
     bool success = socket->bind(QHostAddress::LocalHost,myPort);
 
     while(!success && myPort < 5010) {
-        qDebug() << "Error: Failed to bind UDP socket on port." << port << ". Port already in use. Trying port " << myPort + 1 << "instead.";
+        qDebug() << "Error: Failed to bind UDP socket on port." << myPort << ". Port already in use. Trying port " << myPort + 1 << "instead.";
         myPort = myPort + 1;
         success = socket->bind(QHostAddress::LocalHost,myPort);
     }
 
+    if (!success) {
+        qDebug() << "Failed to bind to socket!";
+        return;
+    }
+
     qDebug() << "UDP socket successfully bound to port" << myPort;
 
+    InitNeighbors();
 
     // connect to signal and slot
     connect(socket,&QUdpSocket::readyRead, this, &UDPHandler::readyRead);
+}
+
+void UDPHandler::InitNeighbors() {
+    if (myPort == 5000) {
+        myNeighbors.append(myPort + 1);
+    } else if (myPort == 5009) {
+        myNeighbors.append(myPort - 1);
+    } else {
+        myNeighbors.append(myPort - 1);
+        myNeighbors.append(myPort + 1);
+    }
+
+    qDebug() << "My neighbors: " << myNeighbors;
 }
 
 // function to send out info
@@ -27,9 +47,33 @@ void UDPHandler::SendIntro() {
     data.append(QString("Hello from port %1").arg(myPort).toUtf8());
 
     // write datagram to socket
-    socket->writeDatagram(data,QHostAddress::LocalHost,5000);
+    for (quint16 neighbor : myNeighbors) {
+        socket->writeDatagram(data,QHostAddress::LocalHost,neighbor);
+    }
 
 }
+
+// function to send out info
+void UDPHandler::SendMessage(QString message) {
+    if (myNeighbors.isEmpty()) {
+        qDebug() << "Error: empty neighbor";
+        return;
+    }
+
+    QByteArray data;
+    data.append(message.toUtf8());
+
+    // write datagram to socket
+    for (quint16 neighbor : myNeighbors) {
+        if (neighbor < 5000 || neighbor > 5009) {
+            qDebug() << "Error: Invalid neighbor port" << neighbor;
+            return;
+        }
+        socket->writeDatagram(data,QHostAddress::LocalHost,neighbor);
+    }
+
+}
+
 
 void UDPHandler::readyRead() {
     QByteArray buffer;
@@ -42,7 +86,7 @@ void UDPHandler::readyRead() {
     // read datagram from socket
     socket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
 
-    qDebug() << "Message from: " << sender.toString();
-    qDebug() << "Message port: " << senderPort;
+    qDebug() << "Sender IP: " << sender.toString();
+    qDebug() << "Sender Port: " << senderPort;
     qDebug() << "Message: " << buffer;
 }

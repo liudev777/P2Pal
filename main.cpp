@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 
     udpHandler.SendIntro();
 
-    // MainWindow w;
-    // w.show();
+    MainWindow w(nullptr, &udpHandler);
+    w.show();
     return a.exec();
 }

@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-ff4c82a9bdcbfbbbb96c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "P2Pal_Devin_Liu",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "P2Pal_Devin_Liu::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-P2Pal_Devin_Liu-Debug-7b631c69abec26086ab5.json",
+					"name" : "P2Pal_Devin_Liu",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "P2Pal_Devin_Liu_autogen::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-P2Pal_Devin_Liu_autogen-Debug-170fefa1631b4c63a081.json",
+					"name" : "P2Pal_Devin_Liu_autogen",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "P2Pal_Devin_Liu_autogen_timestamp_deps::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-P2Pal_Devin_Liu_autogen_timestamp_deps-Debug-5911a03f9f6829a21374.json",
+					"name" : "P2Pal_Devin_Liu_autogen_timestamp_deps",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/Users/devin/Code/P2Pal_Devin_Liu/build/Qt_6_8_2_for_macOS-Debug",
+		"source" : "/Users/devin/Code/P2Pal_Devin_Liu"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

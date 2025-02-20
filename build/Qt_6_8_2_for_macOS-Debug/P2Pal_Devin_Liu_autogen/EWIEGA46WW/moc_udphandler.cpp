@@ -40,6 +40,7 @@ static constexpr auto qt_meta_stringdata_ZN10UDPHandlerE = QtMocHelpers::stringD
     "UDPHandler",
     "messageReceived",
     "",
+    "sequenceNum",
     "senderPort",
     "message",
     "peerJoined",
@@ -63,15 +64,15 @@ Q_CONSTINIT static const uint qt_meta_data_ZN10UDPHandlerE[] = {
        2,       // signalCount
 
  // signals: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    2,   32,    2, 0x06,    1 /* Public */,
-       5,    1,   37,    2, 0x06,    4 /* Public */,
+       1,    3,   32,    2, 0x06,    1 /* Public */,
+       6,    1,   39,    2, 0x06,    5 /* Public */,
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       6,    0,   40,    2, 0x08,    6 /* Private */,
+       7,    0,   42,    2, 0x08,    7 /* Private */,
 
  // signals: parameters
-    QMetaType::Void, QMetaType::UShort, QMetaType::QString,    3,    4,
-    QMetaType::Void, QMetaType::UShort,    3,
+    QMetaType::Void, QMetaType::Int, QMetaType::UShort, QMetaType::QString,    3,    4,    5,
+    QMetaType::Void, QMetaType::UShort,    4,
 
  // slots: parameters
     QMetaType::Void,
@@ -90,6 +91,7 @@ Q_CONSTINIT const QMetaObject UDPHandler::staticMetaObject = { {
         QtPrivate::TypeAndForceComplete<UDPHandler, std::true_type>,
         // method 'messageReceived'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<int, std::false_type>,
         QtPrivate::TypeAndForceComplete<quint16, std::false_type>,
         QtPrivate::TypeAndForceComplete<QString, std::false_type>,
         // method 'peerJoined'
@@ -106,7 +108,7 @@ void UDPHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
     auto *_t = static_cast<UDPHandler *>(_o);
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
-        case 0: _t->messageReceived((*reinterpret_cast< std::add_pointer_t<quint16>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[2]))); break;
+        case 0: _t->messageReceived((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<quint16>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[3]))); break;
         case 1: _t->peerJoined((*reinterpret_cast< std::add_pointer_t<quint16>>(_a[1]))); break;
         case 2: _t->readyRead(); break;
         default: ;
@@ -115,7 +117,7 @@ void UDPHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
     if (_c == QMetaObject::IndexOfMethod) {
         int *result = reinterpret_cast<int *>(_a[0]);
         {
-            using _q_method_type = void (UDPHandler::*)(quint16 , QString );
+            using _q_method_type = void (UDPHandler::*)(int , quint16 , QString );
             if (_q_method_type _q_method = &UDPHandler::messageReceived; *reinterpret_cast<_q_method_type *>(_a[1]) == _q_method) {
                 *result = 0;
                 return;
@@ -163,9 +165,9 @@ int UDPHandler::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 
 // SIGNAL 0
-void UDPHandler::messageReceived(quint16 _t1, QString _t2)
+void UDPHandler::messageReceived(int _t1, quint16 _t2, QString _t3)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t2))) };
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t2))), const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t3))) };
     QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 

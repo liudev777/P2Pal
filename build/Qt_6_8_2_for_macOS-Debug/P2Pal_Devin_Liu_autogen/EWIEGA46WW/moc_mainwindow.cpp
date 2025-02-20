@@ -40,7 +40,8 @@ static constexpr auto qt_meta_stringdata_ZN10MainWindowE = QtMocHelpers::stringD
     "MainWindow",
     "on_sendButton_clicked",
     "",
-    "displayReceivedMessage",
+    "displayMessage",
+    "sequenceNum",
     "senderPort",
     "message",
     "displayJoinedPeer"
@@ -64,13 +65,13 @@ Q_CONSTINIT static const uint qt_meta_data_ZN10MainWindowE[] = {
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
        1,    0,   32,    2, 0x08,    1 /* Private */,
-       3,    2,   33,    2, 0x08,    2 /* Private */,
-       6,    1,   38,    2, 0x08,    5 /* Private */,
+       3,    3,   33,    2, 0x08,    2 /* Private */,
+       7,    1,   40,    2, 0x08,    6 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
-    QMetaType::Void, QMetaType::UShort, QMetaType::QString,    4,    5,
-    QMetaType::Void, QMetaType::UShort,    4,
+    QMetaType::Void, QMetaType::Int, QMetaType::UShort, QMetaType::QString,    4,    5,    6,
+    QMetaType::Void, QMetaType::UShort,    5,
 
        0        // eod
 };
@@ -86,8 +87,9 @@ Q_CONSTINIT const QMetaObject MainWindow::staticMetaObject = { {
         QtPrivate::TypeAndForceComplete<MainWindow, std::true_type>,
         // method 'on_sendButton_clicked'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        // method 'displayReceivedMessage'
+        // method 'displayMessage'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<int, std::false_type>,
         QtPrivate::TypeAndForceComplete<quint16, std::false_type>,
         QtPrivate::TypeAndForceComplete<QString, std::false_type>,
         // method 'displayJoinedPeer'
@@ -103,7 +105,7 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
     if (_c == QMetaObject::InvokeMetaMethod) {
         switch (_id) {
         case 0: _t->on_sendButton_clicked(); break;
-        case 1: _t->displayReceivedMessage((*reinterpret_cast< std::add_pointer_t<quint16>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[2]))); break;
+        case 1: _t->displayMessage((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<quint16>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[3]))); break;
         case 2: _t->displayJoinedPeer((*reinterpret_cast< std::add_pointer_t<quint16>>(_a[1]))); break;
         default: ;
         }

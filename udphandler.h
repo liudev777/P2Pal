@@ -23,7 +23,7 @@ private slots:
     void readyRead();
 
 signals:
-    void messageReceived(quint16 senderPort, QString message);
+    void messageReceived(int sequenceNum, quint16 senderPort, QString message);
     void peerJoined(quint16 senderPort);
 
 private:
@@ -33,7 +33,16 @@ private:
     void sendAcknowledgement(quint16 senderPort, int sequenceNum);
     QByteArray serializeVariantMap(QVariantMap &messageMap);
     QVariantMap deserializeVariantMap(QByteArray &buffer);
-
+    QByteArray serializeMessageHistory(QVector<QByteArray> &messageHistory);
+    QVector<QByteArray> deserializeMessageHistory(QByteArray &data);
+    void saveToHistory(QByteArray data);
+    void requestHistoryFromNeighbors();
+    void handleHistoryMessage(QByteArray data);
+    void compareAndSelectHistory();
+    void waitForHistories();
+    void useHistory(QVector<QByteArray>);
+    void sendHistory(quint16 senderPort);
+    QByteArray hstry(QVector<QByteArray> messageHistory, quint16 origin, QString type);
 
 private:
     QUdpSocket *socket;
@@ -46,11 +55,8 @@ private:
         QSet<quint16> pendingNeighbors;
     };
     QMap<int, MessageInfo> pendingMessages;
-    struct MessageObj {
-        QString message;
-        quint16 origin;
-        int sequenceNum;
-    };
+    QVector<QByteArray> messageHistory;
+    QMap<quint16, QVector<QByteArray>> messageHistories;
 
 };
 

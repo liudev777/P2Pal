@@ -21,6 +21,7 @@ public:
 private slots:
     void on_sendButton_clicked();
     void displayReceivedMessage(quint16 senderPort, QString message);
+    void displayJoinedPeer(quint16 senderPort);
 
 private:
     Ui::MainWindow *ui;

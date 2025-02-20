@@ -12,7 +12,7 @@ UDPHandler::UDPHandler(QObject *parent, quint16 port) : QObject(parent), myPort(
     bool success = socket->bind(QHostAddress::LocalHost,myPort);
 
     while(!success && myPort < 5010) {
-        qDebug() << "Error: Failed to bind UDP socket on port." << myPort << ". Port already in use. Trying port " << myPort + 1 << "instead.";
+        qDebug() << "Error: Failed to bind UDP socket on port." << myPort << ". Port already in use. Trying port" << myPort + 1 << "instead.";
         myPort = myPort + 1;
         success = socket->bind(QHostAddress::LocalHost,myPort);
     }
@@ -47,7 +47,7 @@ void UDPHandler::initNeighbors() {
         myNeighbors.append(myPort + 1);
     }
 
-    qDebug() << "My neighbors: " << myNeighbors;
+    qDebug() << "My neighbors:" << myNeighbors;
 }
 
 QByteArray UDPHandler::serializeVariantMap(QVariantMap &messageMap) {
@@ -66,8 +66,20 @@ QVariantMap UDPHandler::deserializeVariantMap(QByteArray &buffer) {
 
 // function to send out info
 void UDPHandler::sendIntro() {
+    // ping neighbor peer to let them know you joined
+    QByteArray data = msg("", myPort, -1, "ping");
+
+    for (quint16 neighbor : myNeighbors) {
+        if (neighbor < 5000 || neighbor > 5009) {
+            qDebug() << "Error: Invalid neighbor port" << neighbor;
+            return;
+        }
+        socket->writeDatagram(data,QHostAddress::LocalHost,neighbor);
+    }
+
     QString message = QString("Hello from port %1").arg(myPort);
     sendMessage(message);
+
 }
 
 // function to send out info
@@ -94,7 +106,7 @@ void UDPHandler::sendMessage(QString message) {
     pendingMessages.insert(sequenceNum, msgInfo);
 
     int localSequenceNum = sequenceNum;
-    QTimer::singleShot(5000, this, [this, localSequenceNum]() {
+    QTimer::singleShot(2000, this, [this, localSequenceNum]() {
         resendMessages(localSequenceNum);
     });
 
@@ -108,7 +120,7 @@ void UDPHandler::resendMessages(int sequenceNum) {
     MessageInfo &msgInfo = pendingMessages[sequenceNum];
 
     if (!msgInfo.pendingNeighbors.isEmpty()) {
-        qDebug() << "Resending message" << sequenceNum << "to neighbors: " << msgInfo.pendingNeighbors;
+        qDebug() << "Resending message" << sequenceNum << "to neighbors:" << msgInfo.pendingNeighbors;
 
         QByteArray data = msgInfo.data;
 
@@ -128,7 +140,7 @@ void UDPHandler::resendMessages(int sequenceNum) {
 
 // store message, origin, and sequence number in QVariantMap
 QByteArray UDPHandler::msg(QString message, quint16 origin, int sequenceNum, QString type) {
-    qDebug() << "message: " << message << "origin: " << origin << "sequence number: " << sequenceNum;
+    qDebug() << "message:" << message << "origin:" << origin << "sequence number:" << sequenceNum;
 
     QVariantMap messageMap;
     messageMap["message"] = message;
@@ -159,9 +171,9 @@ void UDPHandler::readyRead() {
     // read datagram from socket
     socket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
 
-    // qDebug() << "Sender IP: " << sender.toString();
-    // qDebug() << "Sender Port: " << senderPort;
-    // qDebug() << "Message: " << buffer;
+    // qDebug() << "Sender IP:" << sender.toString();
+    // qDebug() << "Sender Port:" << senderPort;
+    // qDebug() << "Message:" << buffer;
 
     QVariantMap messageMap = deserializeVariantMap(buffer);
 
@@ -171,20 +183,23 @@ void UDPHandler::readyRead() {
     int sequenceNum = messageMap.value("sequenceNum").toInt();
 
     if (type == "chat") {
-        qDebug() << "Received message: " << messageMap;
+        qDebug() << "Received message:" << messageMap;
 
         // let sender know we got the msg
         sendAcknowledgement(senderPort, sequenceNum);
 
         // emits signal that gets picked up by receivedMessageBox and displayed
         emit messageReceived(origin, message);
-    } else if (type == "ack"){
+    } else if (type == "ack") {
         qDebug() << "Received acknowledgement for message" << sequenceNum << "from" << origin;
 
         // since we got the ack, we don't want to resend them the message
         if (pendingMessages.contains(sequenceNum)) {
             pendingMessages[sequenceNum].pendingNeighbors.remove(senderPort);
         }
+    } else if (type == "ping") {
+
+        emit peerJoined(senderPort);
     }
 
 }

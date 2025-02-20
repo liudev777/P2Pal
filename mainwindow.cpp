@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent, UDPHandler *udpHandler)
     ui->editMessageBox->setFocus(); // autofocus on launch
 
     connect(udpHandler, &UDPHandler::messageReceived, this, &MainWindow::displayReceivedMessage);
+    connect(udpHandler, &UDPHandler::peerJoined, this, &MainWindow::displayJoinedPeer);
 }
 
 MainWindow::~MainWindow()
@@ -37,4 +38,8 @@ void MainWindow::on_sendButton_clicked()
 
 void MainWindow::displayReceivedMessage(quint16 senderPort, QString message) {
     ui->receivedMessageBox->append(QString("<b>Peer %1:</b> %2").arg(senderPort).arg(message));
+}
+
+void MainWindow::displayJoinedPeer(quint16 senderPort) {
+    ui->receivedMessageBox->append(QString("<b>Peer %1 has joined the session!</b>").arg(senderPort));
 }

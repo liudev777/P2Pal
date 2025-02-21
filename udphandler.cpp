@@ -29,6 +29,13 @@ UDPHandler::UDPHandler(QObject *parent, quint16 port) : QObject(parent), myPort(
     // connect to signal and slot
     connect(socket,&QUdpSocket::readyRead, this, &UDPHandler::readyRead);
 
+
+    // if after a second passes and no history updates from neighbors comes in, we can assume we are the first peer, and thus we set isUpToDate to true to receive messages from future peers.
+    // previously the first peer would be unable to receive messages because this was set to false.
+    QTimer::singleShot(1000, [&]() {
+        isUpToDate = true;
+    });
+
 }
 
 struct MessageInfo {
@@ -64,15 +71,15 @@ QVariantMap UDPHandler::deserializeVariantMap(QByteArray &buffer) {
     return messageMap;
 }
 
-QByteArray UDPHandler::serializeMessageHistory(QVector<QByteArray> &messageHistory) {
+QByteArray UDPHandler::serializeMessageHistory(QMap<int, QVariantMap> &messageHistory) {
     QByteArray buffer;
     QDataStream stream(&buffer, QIODevice::WriteOnly);
     stream << messageHistory;
     return buffer;
 }
 
-QVector<QByteArray> UDPHandler::deserializeMessageHistory(QByteArray &buffer) {
-    QVector<QByteArray> messageHistory;
+QMap<int, QVariantMap> UDPHandler::deserializeMessageHistory(QByteArray &buffer) {
+    QMap<int, QVariantMap> messageHistory;
     QDataStream stream(&buffer, QIODevice::ReadOnly);
     stream >> messageHistory;
     return messageHistory;
@@ -82,22 +89,17 @@ QVector<QByteArray> UDPHandler::deserializeMessageHistory(QByteArray &buffer) {
 // function to send out info
 void UDPHandler::sendIntro() {
     // ping neighbor peer to let them know you joined
-    QByteArray data = msg("", myPort, -1, "ping");
+    QByteArray pingData = msg("", myPort, -1, "ping");
 
     for (quint16 neighbor : myNeighbors) {
         if (neighbor < 5000 || neighbor > 5009) {
             qDebug() << "Error: Invalid neighbor port" << neighbor;
             return;
         }
-        socket->writeDatagram(data,QHostAddress::LocalHost,neighbor);
+        socket->writeDatagram(pingData,QHostAddress::LocalHost,neighbor);
     }
 
     requestHistoryFromNeighbors();
-
-
-    QString message = QString("Hello from port %1").arg(myPort);
-    sendMessage(message);
-
 }
 
 // function to send out info
@@ -117,11 +119,13 @@ void UDPHandler::sendMessage(QString message) {
             qDebug() << "Error: Invalid neighbor port" << neighbor;
             return;
         }
+
         socket->writeDatagram(data,QHostAddress::LocalHost,neighbor);
         msgInfo.pendingNeighbors.insert(neighbor);
     }
 
-    saveToHistory(data);
+    QVariantMap messageMap = deserializeVariantMap(data);
+    saveToHistory(messageMap);
 
     emit messageReceived(sequenceNum, myPort, message);
 
@@ -143,7 +147,7 @@ void UDPHandler::resendMessages(int sequenceNum) {
     MessageInfo &msgInfo = pendingMessages[sequenceNum];
 
     if (!msgInfo.pendingNeighbors.isEmpty()) {
-        qDebug() << "Resending message" << sequenceNum << "to neighbors:" << msgInfo.pendingNeighbors;
+        // qDebug() << "Resending message" << sequenceNum << "to neighbors:" << msgInfo.pendingNeighbors;
 
         QByteArray data = msgInfo.data;
 
@@ -151,18 +155,19 @@ void UDPHandler::resendMessages(int sequenceNum) {
             socket->writeDatagram(data, QHostAddress::LocalHost,neighbor);
         }
 
-        qDebug() << "Max resend attempts reached for message" << sequenceNum;
+        // qDebug() << "Max resend attempts reached for message" << sequenceNum;
         pendingMessages.remove(sequenceNum);
     } else {
-        qDebug() << "All neighbors received message" << sequenceNum;
+        // qDebug() << "All neighbors received message" << sequenceNum;
         pendingMessages.remove(sequenceNum);
     }
 
     return;
 }
 
-void UDPHandler::saveToHistory(QByteArray data) {
-    messageHistory.append(data);
+void UDPHandler::saveToHistory(QVariantMap messageMap) {
+    int sequenceNum = messageMap["sequenceNum"].toInt();
+    messageHistory[sequenceNum] = messageMap;
     return;
 }
 
@@ -182,7 +187,7 @@ QByteArray UDPHandler::msg(QString message, quint16 origin, int sequenceNum, QSt
 }
 
 // function to pack messageHistory into a map with origin and type, then serialize it for sending.
-QByteArray UDPHandler::hstry(QVector<QByteArray> messageHistory, quint16 origin, QString type) {
+QByteArray UDPHandler::hstry(QMap<int, QVariantMap> messageHistory, quint16 origin, QString type) {
     QVariantMap historyMap;
 
     // its kinda weird but I will serialize the vector of bytearray and store it in messageHistoryData
@@ -208,7 +213,7 @@ void UDPHandler::handleHistoryMessage(QByteArray data) {
 
     QVariant rawData = historyMap.value("messageHistoryData");
     QByteArray serializedData = rawData.toByteArray();
-    QVector<QByteArray> messageHistory = deserializeMessageHistory(serializedData);
+    QMap<int, QVariantMap> messageHistory = deserializeMessageHistory(serializedData);
 
     messageHistories[origin] = messageHistory;
 
@@ -223,7 +228,7 @@ void UDPHandler::handleHistoryMessage(QByteArray data) {
 
 // we want the longer history (gonna assume its more up to date)
 void UDPHandler::compareAndSelectHistory() {
-    QVector<QByteArray> longestHistory;
+    QMap<int, QVariantMap> longestHistory;
 
     for (quint16 neighbor : myNeighbors) {
         if (messageHistories[neighbor].size() > longestHistory.size()) {
@@ -235,11 +240,28 @@ void UDPHandler::compareAndSelectHistory() {
 }
 
 // take this history and update our history to this
-void UDPHandler::useHistory(QVector<QByteArray> history) {
-    for (QByteArray msgData : history) {
-        QVariantMap messageMap = deserializeVariantMap(msgData);
-        qDebug() << "Restored msg:" << messageMap;
+void UDPHandler::useHistory(QMap<int, QVariantMap> history) {
+    // for (QByteArray msgData : history) {
+    //     QVariantMap messageMap = deserializeVariantMap(msgData);
+    //     qDebug() << "Restored msg:" << messageMap;
+    // }
+
+    int highestSequence = -1;
+
+    for (auto it = history.constBegin(); it != history.constEnd(); ++it) {
+        qDebug() << "Key:" << it.key() << ", Value:" << it.value();
+        if (it.key() > highestSequence) {
+            highestSequence = it.key();
+        }
     }
+    messageHistory = history;
+    if (highestSequence != -1) {
+        sequenceNum = highestSequence + 1;
+    }
+
+    // emit signal to display all the histories
+    isUpToDate = true;
+    emit updatedHistory(messageHistory);
 }
 
 void UDPHandler::waitForHistories() {
@@ -263,6 +285,36 @@ void UDPHandler::sendHistory(quint16 senderPort) {
     qDebug() << "Sending my history to:" << senderPort;
     QByteArray historyData = hstry(messageHistory, myPort, "history");
     socket->writeDatagram(historyData, QHostAddress::LocalHost, senderPort);
+}
+
+void UDPHandler::propagateToNeighbors(QByteArray data, quint16 excludedNeighbor) {
+
+    MessageInfo msgInfo;
+    msgInfo.data = data;
+
+    // write datagram to socket
+    for (quint16 neighbor : myNeighbors) {
+        if (neighbor < 5000 || neighbor > 5009) {
+            qDebug() << "Error: Invalid neighbor port" << neighbor;
+            return;
+        }
+
+        if (neighbor == excludedNeighbor) continue;
+
+        socket->writeDatagram(data,QHostAddress::LocalHost,neighbor);
+        msgInfo.pendingNeighbors.insert(neighbor);
+    }
+
+    QVariantMap messageMap = deserializeVariantMap(data);
+
+    int localSequenceNum = messageMap.value("sequenceNum").toInt();
+
+    pendingMessages.insert(localSequenceNum, msgInfo);
+
+    QTimer::singleShot(2000, this, [this, localSequenceNum]() {
+        resendMessages(localSequenceNum);
+    });
+
 }
 
 // function to handle receiving signal from socket
@@ -295,18 +347,22 @@ void UDPHandler::readyRead() {
         return;
     }
 
-
     QString message = messageMap.value("message").toString();
     int sequenceNum = messageMap.value("sequenceNum").toInt();
 
     if (type == "chat") {
+        if (!isUpToDate) return;
         qDebug() << "Received message:" << messageMap;
 
         // let sender know we got the msg
         sendAcknowledgement(senderPort, sequenceNum);
+        propagateToNeighbors(data, senderPort);
+
+        // temp solution to prevent the same message from coming in after history updates including that message
+        if (messageHistory.contains(sequenceNum)) return;
 
         this->sequenceNum = sequenceNum + 1;
-        saveToHistory(data);
+        saveToHistory(messageMap);
         // qDebug() << "Our sequenceNum" << this->sequenceNum << "sender sequenceNum" << sequenceNum;
 
         // emits signal that gets picked up by receivedMessageBox and displayed

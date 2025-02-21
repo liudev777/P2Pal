@@ -44,6 +44,9 @@ static constexpr auto qt_meta_stringdata_ZN10UDPHandlerE = QtMocHelpers::stringD
     "senderPort",
     "message",
     "peerJoined",
+    "updatedHistory",
+    "QMap<int,QVariantMap>",
+    "messageHistory",
     "readyRead"
 );
 #else  // !QT_MOC_HAS_STRINGDATA
@@ -56,23 +59,25 @@ Q_CONSTINIT static const uint qt_meta_data_ZN10UDPHandlerE[] = {
       12,       // revision
        0,       // classname
        0,    0, // classinfo
-       3,   14, // methods
+       4,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       2,       // signalCount
+       3,       // signalCount
 
  // signals: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    3,   32,    2, 0x06,    1 /* Public */,
-       6,    1,   39,    2, 0x06,    5 /* Public */,
+       1,    3,   38,    2, 0x06,    1 /* Public */,
+       6,    1,   45,    2, 0x06,    5 /* Public */,
+       7,    1,   48,    2, 0x06,    7 /* Public */,
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       7,    0,   42,    2, 0x08,    7 /* Private */,
+      10,    0,   51,    2, 0x08,    9 /* Private */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::Int, QMetaType::UShort, QMetaType::QString,    3,    4,    5,
     QMetaType::Void, QMetaType::UShort,    4,
+    QMetaType::Void, 0x80000000 | 8,    9,
 
  // slots: parameters
     QMetaType::Void,
@@ -97,6 +102,9 @@ Q_CONSTINIT const QMetaObject UDPHandler::staticMetaObject = { {
         // method 'peerJoined'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         QtPrivate::TypeAndForceComplete<quint16, std::false_type>,
+        // method 'updatedHistory'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<QMap<int,QVariantMap>, std::false_type>,
         // method 'readyRead'
         QtPrivate::TypeAndForceComplete<void, std::false_type>
     >,
@@ -110,7 +118,8 @@ void UDPHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         switch (_id) {
         case 0: _t->messageReceived((*reinterpret_cast< std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<quint16>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[3]))); break;
         case 1: _t->peerJoined((*reinterpret_cast< std::add_pointer_t<quint16>>(_a[1]))); break;
-        case 2: _t->readyRead(); break;
+        case 2: _t->updatedHistory((*reinterpret_cast< std::add_pointer_t<QMap<int,QVariantMap>>>(_a[1]))); break;
+        case 3: _t->readyRead(); break;
         default: ;
         }
     }
@@ -127,6 +136,13 @@ void UDPHandler::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
             using _q_method_type = void (UDPHandler::*)(quint16 );
             if (_q_method_type _q_method = &UDPHandler::peerJoined; *reinterpret_cast<_q_method_type *>(_a[1]) == _q_method) {
                 *result = 1;
+                return;
+            }
+        }
+        {
+            using _q_method_type = void (UDPHandler::*)(QMap<int,QVariantMap> );
+            if (_q_method_type _q_method = &UDPHandler::updatedHistory; *reinterpret_cast<_q_method_type *>(_a[1]) == _q_method) {
+                *result = 2;
                 return;
             }
         }
@@ -152,14 +168,14 @@ int UDPHandler::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 3)
+        if (_id < 4)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 3;
+        _id -= 4;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 3)
+        if (_id < 4)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 3;
+        _id -= 4;
     }
     return _id;
 }
@@ -176,5 +192,12 @@ void UDPHandler::peerJoined(quint16 _t1)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
     QMetaObject::activate(this, &staticMetaObject, 1, _a);
+}
+
+// SIGNAL 2
+void UDPHandler::updatedHistory(QMap<int,QVariantMap> _t1)
+{
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
+    QMetaObject::activate(this, &staticMetaObject, 2, _a);
 }
 QT_WARNING_POP

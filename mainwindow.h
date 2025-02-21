@@ -22,6 +22,9 @@ private slots:
     void on_sendButton_clicked();
     void displayMessage(int sequenceNum, quint16 senderPort, QString message);
     void displayJoinedPeer(quint16 senderPort);
+    void displayMessageHistory(QMap<int, QVariantMap> messageHistory);
+
+    void on_printHistoryButton_clicked();
 
 private:
     Ui::MainWindow *ui;

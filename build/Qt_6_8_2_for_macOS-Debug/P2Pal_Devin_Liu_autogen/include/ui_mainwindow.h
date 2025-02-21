@@ -28,26 +28,30 @@ public:
     QPushButton *sendButton;
     QLabel *label;
     QPlainTextEdit *editMessageBox;
+    QPushButton *printHistoryButton;
 
     void setupUi(QMainWindow *MainWindow)
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
-        MainWindow->resize(800, 600);
+        MainWindow->resize(328, 493);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName("centralwidget");
         receivedMessageBox = new QTextBrowser(centralwidget);
         receivedMessageBox->setObjectName("receivedMessageBox");
-        receivedMessageBox->setGeometry(QRect(30, 20, 261, 192));
+        receivedMessageBox->setGeometry(QRect(30, 20, 261, 281));
         sendButton = new QPushButton(centralwidget);
         sendButton->setObjectName("sendButton");
-        sendButton->setGeometry(QRect(30, 370, 100, 32));
+        sendButton->setGeometry(QRect(30, 410, 100, 61));
         label = new QLabel(centralwidget);
         label->setObjectName("label");
-        label->setGeometry(QRect(30, 260, 101, 16));
+        label->setGeometry(QRect(30, 310, 101, 16));
         editMessageBox = new QPlainTextEdit(centralwidget);
         editMessageBox->setObjectName("editMessageBox");
-        editMessageBox->setGeometry(QRect(30, 290, 261, 74));
+        editMessageBox->setGeometry(QRect(30, 330, 261, 74));
+        printHistoryButton = new QPushButton(centralwidget);
+        printHistoryButton->setObjectName("printHistoryButton");
+        printHistoryButton->setGeometry(QRect(190, 410, 101, 61));
         MainWindow->setCentralWidget(centralwidget);
 
         retranslateUi(MainWindow);
@@ -69,6 +73,7 @@ public:
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>", nullptr));
         sendButton->setText(QCoreApplication::translate("MainWindow", "Send", nullptr));
         label->setText(QCoreApplication::translate("MainWindow", "Send Message", nullptr));
+        printHistoryButton->setText(QCoreApplication::translate("MainWindow", "Print History", nullptr));
     } // retranslateUi
 
 };

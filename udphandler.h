@@ -18,6 +18,8 @@ public:
     explicit UDPHandler(QObject *parent = nullptr, quint16 port = 5000);
     void sendIntro();
     void sendMessage(QString message);
+    QMap<int, QVariantMap> messageHistory;
+    quint16 myPort;
 
 private slots:
     void readyRead();
@@ -25,6 +27,7 @@ private slots:
 signals:
     void messageReceived(int sequenceNum, quint16 senderPort, QString message);
     void peerJoined(quint16 senderPort);
+    void updatedHistory(QMap<int, QVariantMap> messageHistory);
 
 private:
     void initNeighbors();
@@ -33,20 +36,21 @@ private:
     void sendAcknowledgement(quint16 senderPort, int sequenceNum);
     QByteArray serializeVariantMap(QVariantMap &messageMap);
     QVariantMap deserializeVariantMap(QByteArray &buffer);
-    QByteArray serializeMessageHistory(QVector<QByteArray> &messageHistory);
-    QVector<QByteArray> deserializeMessageHistory(QByteArray &data);
-    void saveToHistory(QByteArray data);
+    QByteArray serializeMessageHistory(QMap<int, QVariantMap> &messageHistory);
+    QMap<int, QVariantMap> deserializeMessageHistory(QByteArray &data);
+    void saveToHistory(QVariantMap messageMap);
     void requestHistoryFromNeighbors();
     void handleHistoryMessage(QByteArray data);
     void compareAndSelectHistory();
     void waitForHistories();
-    void useHistory(QVector<QByteArray>);
+    void useHistory(QMap<int, QVariantMap>);
     void sendHistory(quint16 senderPort);
-    QByteArray hstry(QVector<QByteArray> messageHistory, quint16 origin, QString type);
+    QByteArray hstry(QMap<int, QVariantMap> messageHistory, quint16 origin, QString type);
+    void propagateToNeighbors(QByteArray data, quint16 excludedNeighbor);
 
 private:
+    bool isUpToDate = false;
     QUdpSocket *socket;
-    quint16 myPort;
     QVector<quint16> myNeighbors;
     int sequenceNum = 0;
     QTimer *resendTimer;
@@ -55,8 +59,7 @@ private:
         QSet<quint16> pendingNeighbors;
     };
     QMap<int, MessageInfo> pendingMessages;
-    QVector<QByteArray> messageHistory;
-    QMap<quint16, QVector<QByteArray>> messageHistories;
+    QMap<quint16, QMap<int, QVariantMap>> messageHistories;
 
 };
 

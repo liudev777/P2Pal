@@ -11,9 +11,11 @@ int main(int argc, char *argv[])
 
     UDPHandler udpHandler(nullptr, port);
 
+    MainWindow w(nullptr, &udpHandler);
+    w.setWindowTitle(QString("%1").arg(udpHandler.myPort));
+    w.show();
+
     udpHandler.sendIntro();
 
-    MainWindow w(nullptr, &udpHandler);
-    w.show();
     return a.exec();
 }

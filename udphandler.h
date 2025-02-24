@@ -16,6 +16,7 @@ class UDPHandler : public QObject
 
 public:
     explicit UDPHandler(QObject *parent = nullptr, quint16 port = 5000);
+    ~UDPHandler();
     void sendIntro();
     void sendMessage(QString message);
     QMap<int, QVariantMap> messageHistory;
@@ -23,6 +24,7 @@ public:
     int tick = 0;
     void requestHistoryFromNeighbors(quint16 neighborPort);
     quint16 getRandomNeighbor();
+    QVector<quint16> myNeighbors;
 
 private slots:
     void readyRead();
@@ -64,9 +66,9 @@ private:
 
 
 private:
+    QTimer *antiEntropyTimer;
     bool isUpToDate = false;
     QUdpSocket *socket;
-    QVector<quint16> myNeighbors;
     int sequenceNum = 1;
     QTimer *resendTimer;
     struct MessageInfo {

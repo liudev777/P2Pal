@@ -2,6 +2,10 @@
 #include "QRandomGenerator"
 
 quint16 UDPHandler::getRandomNeighbor() {
+    if (myNeighbors.isEmpty()) {
+        qDebug() << "No neighbors available!";
+        return 0;
+    }
     quint16 randomNeighbor = myNeighbors[QRandomGenerator::global()->bounded(myNeighbors.size())];
     return randomNeighbor;
 }
@@ -13,13 +17,15 @@ void UDPHandler::compareHistoryWithNeighbor() {
 }
 
 void UDPHandler::startEntropyTimer() {
-    QTimer *timer = new QTimer();
+    if (!antiEntropyTimer) {
+        antiEntropyTimer = new QTimer(this);
+    }
 
-    QObject::connect(timer, &QTimer::timeout, [&]() {
+    QObject::connect(antiEntropyTimer, &QTimer::timeout, [&]() {
         requestHistoryFromNeighbors(getRandomNeighbor());
     });
 
-    timer->start(10000);
+    antiEntropyTimer->start(1000); // anti entropy every 3 seconds
 }
 
 void UDPHandler::antiEntropy() {
@@ -30,6 +36,9 @@ void UDPHandler::antiEntropy() {
 
 // function to ask specified neighbor for their history log
 void UDPHandler::requestHistoryFromNeighbors(quint16 neighborPort) {
+    if (neighborPort == 0) {
+        throw("Neighbor port is 0!");
+    }
     QByteArray data = msg("", myPort, -1, "request_history");
 
     socket->writeDatagram(data,QHostAddress::LocalHost,neighborPort);
@@ -104,7 +113,7 @@ void UDPHandler::insertHistory(QMap<int, QVariantMap> &historyMap, int insertKey
 }
 
 void UDPHandler::reconcileHistoryDifference(QMap<int, QVariantMap> incomingHistory) {
-    qDebug() << "Reconciling history differences...";
+    // qDebug() << "Reconciling history differences...";
 
     QVector<int> conflicts;
 

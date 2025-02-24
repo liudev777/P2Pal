@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent, UDPHandler *udpHandler)
     , ui(new Ui::MainWindow)
     , udpHandler(udpHandler)
 {
+
     ui->setupUi(this);
 
     ui->editMessageBox->setFocus(); // autofocus on launch
@@ -20,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent, UDPHandler *udpHandler)
 MainWindow::~MainWindow()
 {
     delete ui;
+    // delete udpHandler;
 }
 
 QString message;

@@ -17,6 +17,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr, UDPHandler *udpHandler = nullptr);
     ~MainWindow();
+    UDPHandler *udpHandler;
 
 private slots:
     void on_sendButton_clicked();
@@ -30,7 +31,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    UDPHandler *udpHandler;
+
 
 };
 #endif // MAINWINDOW_H

@@ -12,6 +12,8 @@ qt_add_executable(P2Pal_Devin_Liu
     mainwindow.h
     mainwindow.ui
     udphandler.h udphandler.cpp antientropy.cpp
+    test_p2p.cpp
+    test_p2p.h
 )
 
 target_link_libraries(P2Pal_Devin_Liu
@@ -19,6 +21,7 @@ target_link_libraries(P2Pal_Devin_Liu
         Qt::Core
         Qt::Widgets
         Qt::Network
+        Qt::Test
 )
 
 

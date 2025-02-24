@@ -12,13 +12,13 @@ UDPHandler::UDPHandler(QObject *parent, quint16 port) : QObject(parent), myPort(
     bool success = socket->bind(QHostAddress::LocalHost,myPort);
 
     while(!success && myPort < 5010) {
-        qDebug() << "Error: Failed to bind UDP socket on port." << myPort << ". Port already in use. Trying port" << myPort + 1 << "instead.";
+        // qDebug() << "Error: Failed to bind UDP socket on port." << myPort << ". Port already in use. Trying port" << myPort + 1 << "instead.";
         myPort = myPort + 1;
         success = socket->bind(QHostAddress::LocalHost,myPort);
     }
 
     if (!success) {
-        qDebug() << "Failed to bind to socket!";
+        // qDebug() << "Failed to bind to socket!";
         return;
     }
 
@@ -38,6 +38,13 @@ UDPHandler::UDPHandler(QObject *parent, quint16 port) : QObject(parent), myPort(
 
     startTimer();
     antiEntropy();
+}
+
+UDPHandler::~UDPHandler() {
+    if (socket) {
+        socket->close();
+        delete socket;
+    }
 }
 
 void UDPHandler::startTimer() {
@@ -66,7 +73,7 @@ void UDPHandler::initNeighbors() {
         myNeighbors.append(myPort + 1);
     }
 
-    qDebug() << "My neighbors:" << myNeighbors;
+    // qDebug() << "My neighbors:" << myNeighbors;
 }
 
 QByteArray UDPHandler::serializeVariantMap(QVariantMap &messageMap) {
@@ -117,7 +124,7 @@ void UDPHandler::sendIntro() {
 // function to send out info
 void UDPHandler::sendMessage(QString message) {
     if (myNeighbors.isEmpty()) {
-        qDebug() << "Error: empty neighbor";
+        // qDebug() << "Error: empty neighbor";
         return;
     }
 
@@ -242,7 +249,7 @@ void UDPHandler::handleHistoryMessage(QByteArray data) {
 
 // we want the longer history (gonna assume its more up to date)
 void UDPHandler::compareAndSelectHistory() {
-    qDebug() << "Received histories from" << messageHistories.keys();
+    // qDebug() << "Received histories from" << messageHistories.keys();
     QMap<int, QVariantMap> longestHistory;
     quint16 longestHistoryNeighbor = 0;
 
@@ -369,11 +376,6 @@ void UDPHandler::readyRead() {
     // read datagram from socket
     socket->readDatagram(data.data(), data.size(), &sender, &senderPort);
 
-    // qDebug() << "Sender IP:" << sender.toString();
-    // qDebug() << "Sender Port:" << senderPort;
-    // qDebug() << "Message:" << data;
-
-
     QVariantMap messageMap = deserializeVariantMap(data);
 
     QString type = messageMap.value("type").toString();
@@ -386,7 +388,7 @@ void UDPHandler::readyRead() {
         if (!isUpToDate) {
             handleHistoryMessage(data);
         } else {
-            qDebug() << "history for anti entropy from" << origin << "received!";
+            // qDebug() << "history for anti entropy from" << origin << "received!";
             compareHistoryAndUpdate(messageMap);
         }
 
@@ -398,7 +400,7 @@ void UDPHandler::readyRead() {
 
     if (type == "chat") {
         if (!isUpToDate) return;
-        qDebug() << "Received message:" << messageMap;
+        // qDebug() << "Received message:" << messageMap;
 
         // let sender know we got the msg
         sendAcknowledgement(senderPort, sequenceNum);
@@ -414,7 +416,7 @@ void UDPHandler::readyRead() {
         // emits signal that gets picked up by receivedMessageBox and displayed
         emit messageReceived(sequenceNum, origin, message);
     } else if (type == "ack") {
-        qDebug() << "Received acknowledgement for message" << sequenceNum << "from" << origin;
+        // qDebug() << "Received acknowledgement for message" << sequenceNum << "from" << origin;
 
         // since we got the ack, we don't want to resend them the message
         if (pendingMessages.contains(sequenceNum)) {

@@ -1,15 +1,15 @@
 #include "mainwindow.h"
 #include "udphandler.h"
+#include "test_p2p.h"
 
 #include <QApplication>
+#include <QTest>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    quint16 port = 5000;
-
-    UDPHandler udpHandler(nullptr, port);
+    UDPHandler udpHandler(nullptr, 5000);
 
     MainWindow w(nullptr, &udpHandler);
     w.setWindowTitle(QString("%1").arg(udpHandler.myPort));
@@ -18,4 +18,7 @@ int main(int argc, char *argv[])
     udpHandler.sendIntro();
 
     return a.exec();
+
+    // Test_P2P test;
+    // return QTest::qExec(&test, argc, argv);
 }

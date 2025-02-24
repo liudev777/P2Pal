@@ -36,6 +36,18 @@ UDPHandler::UDPHandler(QObject *parent, quint16 port) : QObject(parent), myPort(
         isUpToDate = true;
     });
 
+    startTimer();
+    antiEntropy();
+}
+
+void UDPHandler::startTimer() {
+    QTimer *timer = new QTimer();
+
+    QObject::connect(timer, &QTimer::timeout, [&]() {
+        tick++;
+    });
+
+    timer->start(10);
 }
 
 struct MessageInfo {
@@ -180,6 +192,7 @@ QByteArray UDPHandler::msg(QString message, quint16 origin, int sequenceNum, QSt
     messageMap["origin"] = origin;
     messageMap["sequenceNum"] = sequenceNum;
     messageMap["type"] = type;
+    messageMap["clock"] = tick;
 
     QByteArray data = serializeVariantMap(messageMap);
 
@@ -194,6 +207,7 @@ QByteArray UDPHandler::hstry(QMap<int, QVariantMap> messageHistory, quint16 orig
     historyMap["messageHistoryData"] = serializeMessageHistory(messageHistory);
     historyMap["origin"] = origin;
     historyMap["type"] = type;
+    historyMap["clock"] = tick;
 
     QByteArray data = serializeVariantMap(historyMap);
 
@@ -228,15 +242,28 @@ void UDPHandler::handleHistoryMessage(QByteArray data) {
 
 // we want the longer history (gonna assume its more up to date)
 void UDPHandler::compareAndSelectHistory() {
+    qDebug() << "Received histories from" << messageHistories.keys();
     QMap<int, QVariantMap> longestHistory;
+    quint16 longestHistoryNeighbor = 0;
 
     for (quint16 neighbor : myNeighbors) {
         if (messageHistories[neighbor].size() > longestHistory.size()) {
             longestHistory = messageHistories[neighbor];
+            longestHistoryNeighbor = neighbor;
         }
     }
 
+    if (longestHistoryNeighbor != 0) {
+        qDebug() << "Choose history from" << longestHistoryNeighbor;
+    } else {
+        qDebug() << "Got an empty history";
+    }
+
     useHistory(longestHistory);
+}
+
+void UDPHandler::updateClock(int tick) {
+    this->tick = tick;
 }
 
 // take this history and update our history to this
@@ -249,14 +276,19 @@ void UDPHandler::useHistory(QMap<int, QVariantMap> history) {
     int highestSequence = -1;
 
     for (auto it = history.constBegin(); it != history.constEnd(); ++it) {
-        qDebug() << "Key:" << it.key() << ", Value:" << it.value();
+        // qDebug() << "Key:" << it.key() << ", Value:" << it.value();
         if (it.key() > highestSequence) {
             highestSequence = it.key();
         }
     }
     messageHistory = history;
+
+    // if history is empty, we don't want to increment sequenceNum, this will lead to skipping sequences.
     if (highestSequence != -1) {
         sequenceNum = highestSequence + 1;
+        QVariantMap lastMessageMap = history.last();
+        int latestTick = lastMessageMap.value("clock").toInt();
+        updateClock(latestTick);
     }
 
     // emit signal to display all the histories
@@ -264,8 +296,16 @@ void UDPHandler::useHistory(QMap<int, QVariantMap> history) {
     emit updatedHistory(messageHistory);
 }
 
+void UDPHandler::checkAndHandleHistoryStatus() {
+    if (messageHistories.size() == myNeighbors.size()) {
+        return;
+    } else {
+        compareAndSelectHistory();
+    }
+}
+
 void UDPHandler::waitForHistories() {
-    QTimer::singleShot(1000, this, &UDPHandler::compareAndSelectHistory);
+    QTimer::singleShot(1000, this, &UDPHandler::checkAndHandleHistoryStatus);
 }
 
 // function to ask neighbors for their history log
@@ -282,7 +322,7 @@ void UDPHandler::requestHistoryFromNeighbors() {
 }
 
 void UDPHandler::sendHistory(quint16 senderPort) {
-    qDebug() << "Sending my history to:" << senderPort;
+    // qDebug() << "Sending my history to:" << senderPort;
     QByteArray historyData = hstry(messageHistory, myPort, "history");
     socket->writeDatagram(historyData, QHostAddress::LocalHost, senderPort);
 }
@@ -343,7 +383,13 @@ void UDPHandler::readyRead() {
         sendHistory(origin);
         return;
     } else if (type == "history") {
-        handleHistoryMessage(data);
+        if (!isUpToDate) {
+            handleHistoryMessage(data);
+        } else {
+            qDebug() << "history for anti entropy from" << origin << "received!";
+            compareHistoryAndUpdate(messageMap);
+        }
+
         return;
     }
 

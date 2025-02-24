@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 project(P2Pal_Devin_Liu LANGUAGES CXX)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Network)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Network Test)
 
 qt_standard_project_setup()
 
@@ -11,7 +11,7 @@ qt_add_executable(P2Pal_Devin_Liu
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
-    udphandler.h udphandler.cpp
+    udphandler.h udphandler.cpp antientropy.cpp
 )
 
 target_link_libraries(P2Pal_Devin_Liu
@@ -20,6 +20,7 @@ target_link_libraries(P2Pal_Devin_Liu
         Qt::Widgets
         Qt::Network
 )
+
 
 include(GNUInstallDirs)
 

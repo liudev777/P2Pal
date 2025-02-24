@@ -1,2 +1,0 @@
-set(__QT_DEPLOY_TARGET_P2Pal_Devin_Liu_FILE /Users/devin/Code/P2Pal_Devin_Liu/build/Qt_6_8_2_for_macOS-Debug/P2Pal_Devin_Liu.app/Contents/MacOS/P2Pal_Devin_Liu)
-set(__QT_DEPLOY_TARGET_P2Pal_Devin_Liu_TYPE EXECUTABLE)

@@ -26,6 +26,8 @@ private slots:
 
     void on_printHistoryButton_clicked();
 
+    void on_antiEntropyButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     UDPHandler *udpHandler;

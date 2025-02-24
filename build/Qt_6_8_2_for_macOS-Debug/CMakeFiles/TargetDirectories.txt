@@ -1,9 +1,0 @@
-/Users/devin/Code/P2Pal_Devin_Liu/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/P2Pal_Devin_Liu.dir
-/Users/devin/Code/P2Pal_Devin_Liu/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/edit_cache.dir
-/Users/devin/Code/P2Pal_Devin_Liu/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/rebuild_cache.dir
-/Users/devin/Code/P2Pal_Devin_Liu/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/list_install_components.dir
-/Users/devin/Code/P2Pal_Devin_Liu/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/install.dir
-/Users/devin/Code/P2Pal_Devin_Liu/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/install/local.dir
-/Users/devin/Code/P2Pal_Devin_Liu/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/install/strip.dir
-/Users/devin/Code/P2Pal_Devin_Liu/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/P2Pal_Devin_Liu_autogen_timestamp_deps.dir
-/Users/devin/Code/P2Pal_Devin_Liu/build/Qt_6_8_2_for_macOS-Debug/CMakeFiles/P2Pal_Devin_Liu_autogen.dir

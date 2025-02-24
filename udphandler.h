@@ -20,6 +20,9 @@ public:
     void sendMessage(QString message);
     QMap<int, QVariantMap> messageHistory;
     quint16 myPort;
+    int tick = 0;
+    void requestHistoryFromNeighbors(quint16 neighborPort);
+    quint16 getRandomNeighbor();
 
 private slots:
     void readyRead();
@@ -30,6 +33,7 @@ signals:
     void updatedHistory(QMap<int, QVariantMap> messageHistory);
 
 private:
+    void startTimer();
     void initNeighbors();
     QByteArray msg(QString message, quint16 origin, int sequenceNum = 0, QString type = "chat");
     void resendMessages(int sequenceNum);
@@ -47,12 +51,23 @@ private:
     void sendHistory(quint16 senderPort);
     QByteArray hstry(QMap<int, QVariantMap> messageHistory, quint16 origin, QString type);
     void propagateToNeighbors(QByteArray data, quint16 excludedNeighbor);
+    void checkAndHandleHistoryStatus();
+    void antiEntropy();
+
+    void compareHistoryWithNeighbor();
+    void startEntropyTimer();
+
+    void compareHistoryAndUpdate(QVariantMap historyMap);
+    void reconcileHistoryDifference(QMap<int, QVariantMap> messageHistory);
+    void insertHistory(QMap<int, QVariantMap> &historyMap, int insertKey, QVariantMap incomingMessageMap);
+    void updateClock(int tick);
+
 
 private:
     bool isUpToDate = false;
     QUdpSocket *socket;
     QVector<quint16> myNeighbors;
-    int sequenceNum = 0;
+    int sequenceNum = 1;
     QTimer *resendTimer;
     struct MessageInfo {
         QByteArray data;

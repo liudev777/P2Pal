@@ -4,26 +4,28 @@
 #include <QDataStream>
 #include <QByteArray>
 #include <QSet>
+#include <QThread>
 
-UDPHandler::UDPHandler(QObject *parent, quint16 port) : QObject(parent), myPort(port){
+UDPHandler::UDPHandler(QObject *parent, quint16 port) : QObject(parent), myPort(port), antiEntropyTimer(nullptr){
 
     // make and bind socket to address and port
     socket = new QUdpSocket(this);
     bool success = socket->bind(QHostAddress::LocalHost,myPort);
 
+    // idea here is that we want the peer to take the next available port, and keep trying until it does
     while(!success && myPort < 5010) {
-        // qDebug() << "Error: Failed to bind UDP socket on port." << myPort << ". Port already in use. Trying port" << myPort + 1 << "instead.";
         myPort = myPort + 1;
         success = socket->bind(QHostAddress::LocalHost,myPort);
     }
 
     if (!success) {
         // qDebug() << "Failed to bind to socket!";
-        return;
+        qFatal("Failed to bind to a port");
     }
 
     qDebug() << "UDP socket successfully bound to port" << myPort;
 
+    // found our neighbor ports
     initNeighbors();
 
     // connect to signal and slot
@@ -36,21 +38,15 @@ UDPHandler::UDPHandler(QObject *parent, quint16 port) : QObject(parent), myPort(
         isUpToDate = true;
     });
 
-    startTimer();
+    startTimer(); // timer for our tick. I have it set to 1/100th of a second
     antiEntropy();
 }
 
-UDPHandler::~UDPHandler() {
-    if (socket) {
-        socket->close();
-        delete socket;
-    }
-}
-
+// clock tick timer
 void UDPHandler::startTimer() {
-    QTimer *timer = new QTimer();
+    QTimer *timer = new QTimer(this);
 
-    QObject::connect(timer, &QTimer::timeout, [&]() {
+    QObject::connect(timer, &QTimer::timeout, this, [this]() {
         tick++;
     });
 
@@ -76,6 +72,7 @@ void UDPHandler::initNeighbors() {
     // qDebug() << "My neighbors:" << myNeighbors;
 }
 
+// i know the bottom 4 serialize and deserialize are kind of redundant but I couldn't figure out how to make them return as different types from one class
 QByteArray UDPHandler::serializeVariantMap(QVariantMap &messageMap) {
     QByteArray buffer;
     QDataStream stream(&buffer, QIODevice::WriteOnly);
@@ -108,20 +105,21 @@ QMap<int, QVariantMap> UDPHandler::deserializeMessageHistory(QByteArray &buffer)
 // function to send out info
 void UDPHandler::sendIntro() {
     // ping neighbor peer to let them know you joined
-    QByteArray pingData = msg("", myPort, -1, "ping");
+    // QByteArray pingData = msg("", myPort, -1, "ping");
 
-    for (quint16 neighbor : myNeighbors) {
-        if (neighbor < 5000 || neighbor > 5009) {
-            qDebug() << "Error: Invalid neighbor port" << neighbor;
-            return;
-        }
-        socket->writeDatagram(pingData,QHostAddress::LocalHost,neighbor);
-    }
+    // for (quint16 neighbor : myNeighbors) {
+    //     if (neighbor < 5000 || neighbor > 5009) {
+    //         qDebug() << "Error: Invalid neighbor port" << neighbor;
+    //         return;
+    //     }
+    //     socket->writeDatagram(pingData,QHostAddress::LocalHost,neighbor);
+    // }
 
+    // Neighbors (1-2) will send you a copy of their history which you will compare and update yours against.
     requestHistoryFromNeighbors();
 }
 
-// function to send out info
+// function to send out message
 void UDPHandler::sendMessage(QString message) {
     if (myNeighbors.isEmpty()) {
         // qDebug() << "Error: empty neighbor";
@@ -140,17 +138,20 @@ void UDPHandler::sendMessage(QString message) {
         }
 
         socket->writeDatagram(data,QHostAddress::LocalHost,neighbor);
+        // we will temporary store the sent info so we can resend if they didn't receive it the first time
         msgInfo.pendingNeighbors.insert(neighbor);
     }
 
     QVariantMap messageMap = deserializeVariantMap(data);
     saveToHistory(messageMap);
 
+    // here, message isn't actually being received, but this signal double as update local chat history so I will use it here. (too lazy to rename).
     emit messageReceived(sequenceNum, myPort, message);
 
     pendingMessages.insert(sequenceNum, msgInfo);
 
     int localSequenceNum = sequenceNum;
+
     QTimer::singleShot(2000, this, [this, localSequenceNum]() {
         resendMessages(localSequenceNum);
     });
@@ -242,6 +243,7 @@ void UDPHandler::handleHistoryMessage(QByteArray data) {
     if (messageHistories.size() == myNeighbors.size()) {
         compareAndSelectHistory();
     } else {
+        // wait a little bit for the other history (if there is) to come in before comparing
         waitForHistories();
     }
 

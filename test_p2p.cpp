@@ -77,6 +77,8 @@ void Test_P2P::test2() {
 
 }
 
+// test peer disconnection and connection and message reconciliation and propagation when peers are cut off from each other.
+// The idea here is that since each peer are connected by left and right, any peer that disconnects, the left and right won't have access to each other. We want to send individual messages on each side and see if the system can reconcile once the disconnected peer joins again.
 void Test_P2P::test3() {
     MainWindow *w_5000 = windows[5000];
     MainWindow *w_5002 = windows[5002];
@@ -130,18 +132,11 @@ void Test_P2P::test3() {
 
     MainWindow *w_5001 = windows[5001];
 
+    // checks to make sure after 10 seconds, all the messages are consistent and in order.
     testReceivedMessageOrder(*w_5000, expectedMessageOrder);
     testReceivedMessageOrder(*w_5001, expectedMessageOrder);
     testReceivedMessageOrder(*w_5002, expectedMessageOrder);
     testReceivedMessageOrder(*w_5003, expectedMessageOrder);
-}
-
-void Test_P2P::test4() {
-    killInstance(5003);
-    MainWindow *w_5002 = windows[5002];
-    testSendMessage(*w_5002, "test resend message");
-    createWindow(1); // should create 5003 after 5002 sends message
-
 }
 
 // kill and remove from map
@@ -155,30 +150,32 @@ void Test_P2P::killInstance(quint16 port) {
             window->udpHandler->deleteLater();
         }
 
+        // gotta do some cleanup so deleted windows aren't accessed accidentally
         window->close();
         delete window;
+        window = nullptr;
         QCoreApplication::processEvents();
 
     }
     windows.remove(port);
 }
 
+// function to spin up a peer, the peer will choose their own port based on next available port from 5000.
 QMap<quint16, MainWindow*> Test_P2P::createWindow(int numWindow) {
 
     quint16 port = 5000;
     QScreen *screen = QGuiApplication::primaryScreen();
+
     QRect screenGeometry = screen->availableGeometry();
 
-    int windowWidth = 328; // Approximate width of each window
-    int windowHeight = 531; // Approximate height of each window
-    int spacing = 0; // Space between windows
+    int windowWidth = 328;
+    int windowHeight = 531;
+    int spacing = 0;
 
-
+    // this is just to place the windows side by side so viewer can see them all at the same time
     for (int i = 1; i < numWindow + 1; i++) {
         UDPHandler *udpHandler = new UDPHandler(nullptr, port);
         MainWindow *w = new MainWindow(nullptr, udpHandler);
-
-        // udpHandler->setParent(w);
 
         int position = udpHandler->myPort - 5000;
         w->setWindowTitle(QString("Port %1").arg(udpHandler->myPort));
@@ -225,7 +222,6 @@ void Test_P2P::testReceivedMessageOrder(MainWindow &w, QStringList expectedOrder
     QString historyText = messageHistory->toPlainText();
     QStringList receivedMessages = historyText.split("\n", Qt::SkipEmptyParts); // split messages by new lines
 
-    // extract only the message part (after Peer X: )
     for (int i = 0; i < receivedMessages.size(); i++) {
         receivedMessages[i] = receivedMessages[i].section(":", 1).trimmed();
     }

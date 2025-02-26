@@ -16,7 +16,6 @@ class UDPHandler : public QObject
 
 public:
     explicit UDPHandler(QObject *parent = nullptr, quint16 port = 5000);
-    ~UDPHandler();
     void sendIntro();
     void sendMessage(QString message);
     QMap<int, QVariantMap> messageHistory;

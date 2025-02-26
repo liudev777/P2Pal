@@ -6,6 +6,7 @@ quint16 UDPHandler::getRandomNeighbor() {
         qDebug() << "No neighbors available!";
         return 0;
     }
+    // we will pick a random neighbor from the neighborlist. Right now it can pick an inactive neighbor, but since antientropy timer is pretty fast it should be okay for now.
     quint16 randomNeighbor = myNeighbors[QRandomGenerator::global()->bounded(myNeighbors.size())];
     return randomNeighbor;
 }
@@ -16,18 +17,21 @@ void UDPHandler::compareHistoryWithNeighbor() {
 
 }
 
+// this is how often peers will compare and update their histories.
 void UDPHandler::startEntropyTimer() {
+
     if (!antiEntropyTimer) {
         antiEntropyTimer = new QTimer(this);
     }
 
-    QObject::connect(antiEntropyTimer, &QTimer::timeout, [&]() {
+    QObject::connect(antiEntropyTimer, &QTimer::timeout, this, [this]() {
         requestHistoryFromNeighbors(getRandomNeighbor());
     });
 
-    antiEntropyTimer->start(1000); // anti entropy every 3 seconds
+    antiEntropyTimer->start(1000); // anti entropy every 1 seconds
 }
 
+// entrypoint to start antientropy process
 void UDPHandler::antiEntropy() {
     startEntropyTimer();
     return;
@@ -37,7 +41,7 @@ void UDPHandler::antiEntropy() {
 // function to ask specified neighbor for their history log
 void UDPHandler::requestHistoryFromNeighbors(quint16 neighborPort) {
     if (neighborPort == 0) {
-        throw("Neighbor port is 0!");
+        return;
     }
     QByteArray data = msg("", myPort, -1, "request_history");
 
@@ -54,6 +58,8 @@ void UDPHandler::compareHistoryAndUpdate(QVariantMap historyMap) {
     reconcileHistoryDifference(incomingHistory);
 }
 
+// this function should technically be broken up into 2 but i'm running out of time to submit so itll stay as one super function.
+// This function takes conflicting messages with the same sequence number but different messages and figures out the order based on the clock tick that it was sent.
 void UDPHandler::insertHistory(QMap<int, QVariantMap> &historyMap, int insertKey, QVariantMap incomingMessageMap) {
     int incomingClock = incomingMessageMap["clock"].toInt();
     if (incomingClock == 0) {
@@ -68,6 +74,7 @@ void UDPHandler::insertHistory(QMap<int, QVariantMap> &historyMap, int insertKey
 
         // determine correct placement
         if (incomingClock < existingClock) {
+
             // incoming message has a lower clock, take the current sequence and increment the rest.
             updatedMap[insertKey] = incomingMessageMap;
             updatedMap[insertKey]["sequenceNum"] = insertKey; // since we keep track of sequenceNum in the map, we also want to increment it so there ins't a mismatch between the key and stored seq num.
@@ -170,7 +177,8 @@ void UDPHandler::reconcileHistoryDifference(QMap<int, QVariantMap> incomingHisto
             }
         }
 
-        // insert message at the correct position
+        // *duct tape fix, need to improve
+        // after moving the message, we want to check if the messages are the same (so we don't insert it again)
         QVariantMap localMessage = messageHistory.value(targetPosition);
         bool isExistingMessage2 =
             incomingMessage["origin"] == localMessage["origin"] &&

@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent, UDPHandler *udpHandler)
     ui->myPortLabel->setText(QString("%1").arg(udpHandler->myPort));
 
     connect(udpHandler, &UDPHandler::messageReceived, this, &MainWindow::displayMessage);
-    connect(udpHandler, &UDPHandler::peerJoined, this, &MainWindow::displayJoinedPeer);
+    // connect(udpHandler, &UDPHandler::peerJoined, this, &MainWindow::displayJoinedPeer);
     connect(udpHandler, &UDPHandler::updatedHistory, this, &MainWindow::displayMessageHistory);
 
 }
